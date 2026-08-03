@@ -57,21 +57,21 @@
     </div>
 
     <script>
-        async function fetchAIResponse(userPrompt) {
-            const apiUrl = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent";
-            
-            const response = await fetch(apiUrl, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: userPrompt }] }]
-                })
-            });
+        const localKnowledge = {
+            "helsinki": "Helsinki on Suomen pääkaupunki ja väkirikkain kaupunki. Se tunnetaan modernista arkkitehtuuristaan, merellisestä sijainnistaan ja eläväisestä kulttuurielämästään. Kaupunki on perustettu vuonna 1550.",
+            "tampere": "Tampere on Suomen kolmanneksi suurin kaupunki, joka tunnetaan teollisesta historiastaan, punatiilisistä rakennuksistaan ja lukuisista järvistään.",
+            "tekoäly": "Tekoäly (AI) tarkoittaa tietokonejärjestelmiä, jotka kykenevät suorittamaan tehtäviä, jotka vaativat perinteisesti ihmisen älykkyyttä, kuten oppimista, päättelyä ja ongelmanratkaisua.",
+            "oletus": "Analysoin kysymystäsi... Neural Core -arkkitehtuurini prosessoi dataa reaaliajassa. Tieto on synteesi, ja Helsingin kaltaiset kohteet ovat keskeisiä osaamiskeskittymiä."
+        };
 
-            if (!response.ok) throw new Error("API Connection Failed");
-            
-            const data = await response.json();
-            return data.candidates[0].content.parts[0].text;
+        async function fetchAIResponse(userPrompt) {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const key = userPrompt.toLowerCase();
+                    const foundKey = Object.keys(localKnowledge).find(k => key.includes(k));
+                    resolve(foundKey ? localKnowledge[foundKey] : localKnowledge["oletus"]);
+                }, 1500);
+            });
         }
 
         async function handleInput() {
@@ -80,16 +80,14 @@
             const query = input.value.trim();
             if(!query) return;
 
-            // User Message
             const uMsg = document.createElement('div');
             uMsg.className = 'bg-slate-700/50 p-4 rounded-xl text-sm self-end ml-auto max-w-[70%] border border-slate-600';
             uMsg.innerText = query;
             chat.appendChild(uMsg);
             
-            // Loading Animation
             const lMsg = document.createElement('div');
             lMsg.className = 'text-xs text-cyan-500 font-mono animate-pulse';
-            lMsg.innerText = "> Suoritetaan API-kutsua...";
+            lMsg.innerText = "> Yhdistetään synteesimoottoriin...";
             chat.appendChild(lMsg);
 
             input.value = '';
@@ -108,7 +106,7 @@
                 const currentWidth = parseInt(evoBar.style.width) || 45;
                 evoBar.style.width = Math.min(100, currentWidth + 5) + "%";
             } catch (err) {
-                lMsg.innerText = "> Virhe: API-yhteys epäonnistui.";
+                lMsg.innerText = "> Järjestelmävirhe: Yhteys synteesimoottoriin keskeytyi.";
             }
         }
     </script>
